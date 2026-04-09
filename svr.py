@@ -55,6 +55,12 @@ def get_ip():
     import requests
     return requests.get("https://api.ipify.org").text
 
+def get_icon(name, folder):
+    if not name:
+        return None
+    fname = f"{name.lower().replace(' ','_')}.png"
+    return f"https://raw.githubusercontent.com/KimaruOff/StarStats/main/static/{folder}/{fname}"
+
 @app.route("/player")
 def player_stats():
     q = request.args.get("q")
