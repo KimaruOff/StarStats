@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Статистика игрока</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container">
+
+    <!-- Информация игрока -->
+    <h1>{{ player.name }} ({{ player.tag }})</h1>
+
+    {% if player.club %}
+    <p>Клуб: {{ player.club.name }} ({{ player.club.tag }})</p>
+    {% else %}
+    <p>Клуб: нет</p>
+    {% endif %}
+
+    <p>Трофеи: {{ player.trophies }}</p>
+    <p>Наибольшее количество трофеев: {{ player.highestTrophies }}</p>
+    <p>Уровень опыта: {{ player.expLevel }}</p>
+
+    <!-- Блок побед -->
+    <div class="victories">
+        <p>3 на 3 победы: {{ player["3vs3Victories"] }}</p>
+        <p>Соло победы: {{ player.soloVictories }}</p>
+        <p>Дуо победы: {{ player.duoVictories }}</p>
+    </div>
+
+    <p>Общее количество бойцов: {{ brawlers|length }}/101</p>
+    <p>Праймов: {{ player.totalPrestigeLevel }}</p>
+
+    <hr>
+
+    <!-- Максимальный винстрик -->
+    {% if max_streak > 0 %}
+    <div class="max-streak-summary" style="border:1px solid #ccc; padding:10px; margin:20px 0;">
+        <h2>Максимальный винстрик среди всех бойцов</h2>
+        <p>Винстрик: {{ max_streak }} 🏆</p>
+        <p>Боец: {{ max_brawler }}</p>
+
+        {% set icon_file = 'brawlers/' + max_brawler.lower().replace(' ','_') + '.png' %}
+        <img src="{{ url_for('static', filename=icon_file) }}" alt="{{ max_brawler }}" 
+             style="width:60px; height:60px;"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div style="display:none;">{{ max_brawler }}</div>
+    </div>
+    {% endif %}
+
+    <hr>
+
+    <!-- Карточки бойцов -->
+    <div class="brawler-grid">
+        {% for b in brawlers %}
+        <div class="brawler-card">
+            <div class="brawler-scroll">
+
+                <!-- Иконка бойца -->
+                {% set b_icon = 'brawlers/' + b.name.lower().replace(' ','_') + '.png' %}
+                <img src="{{ url_for('static', filename=b_icon) }}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="brawler-fallback" style="display:none;">{{ b.name }}</div>
+
+                <div class="brawler-name">{{ b.name }}</div>
+
+                <div class="brawler-info">
+                    <p>{{ b.trophies }} 🏆</p>
+                    <p>Сила: {{ b.power }}</p>
+                    <p>Прайм: {{ b.prestigeLevel }}</p>
+                    {% if b.currentWinStreak > 0 %}
+                    <p>Винстрик: {{ b.currentWinStreak }}</p>
+                    {% endif %}
+                </div>
+
+                {% if b.maxWinStreak > 0 %}
+                <div class="max-streak">
+                    Макс. винстрик: {{ b.maxWinStreak }}
+                </div>
+                {% endif %}
+
+                <!-- Скин -->
+                <div class="skin-section">
+                    {% if b.skin %}
+                        {% set skin_file = 'skins/' + b.skin.name.lower().replace(' ','_') + '.png' %}
+                        <img class="skin"
+                             src="{{ url_for('static', filename=skin_file) }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="skin-text" style="display:none;">Скин: {{ b.skin.name }}</div>
+                    {% else %}
+                        <div class="skin-text">Нет скина</div>
+                    {% endif %}
+                </div>
+
+                <!-- Гаджеты -->
+                <div class="brawler-extra">
+                    {% for g in b.gadgets %}
+                        {% set g_file = 'gadgets/' + g.name.lower().replace(' ','_') + '.png' %}
+                        <img src="{{ url_for('static', filename=g_file) }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="skin-text" style="display:none;">Гаджет: {{ g.name }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пассивки -->
+                <div class="brawler-extra">
+                    {% for s in b.starPowers %}
+                        {% set s_file = 'starpowers/' + s.name.lower().replace(' ','_') + '.png' %}
+                        <img src="{{ url_for('static', filename=s_file) }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="skin-text" style="display:none;">Пассивка: {{ s.name }}</div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+</body>
+</html>
