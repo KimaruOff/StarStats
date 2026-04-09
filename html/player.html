@@ -12,9 +12,9 @@
     <h1>{{ player.name }} ({{ player.tag }})</h1>
 
     {% if player.club %}
-    <p>Клуб: {{ player.club.name }} ({{ player.club.tag }})</p>
+        <p>Клуб: {{ player.club.name }} ({{ player.club.tag }})</p>
     {% else %}
-    <p>Клуб: нет</p>
+        <p>Клуб: нет</p>
     {% endif %}
 
     <p>Трофеи: {{ player.trophies }}</p>
@@ -39,10 +39,11 @@
         <h2>Максимальный винстрик среди всех бойцов</h2>
         <p>Винстрик: {{ max_streak }} 🏆</p>
         <p>Боец: {{ max_brawler }}</p>
-        <img src="{{ get_icon(max_brawler, 'brawlers') }}" alt="{{ max_brawler }}"
-             style="width:60px; height:60px;"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <div style="display:none;">{{ max_brawler }}</div>
+        {% if max_brawler_icon %}
+            <img src="{{ max_brawler_icon }}" alt="{{ max_brawler }}" style="width:60px; height:60px;">
+        {% else %}
+            <div>{{ max_brawler }}</div>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -55,9 +56,11 @@
             <div class="brawler-scroll">
 
                 <!-- Иконка бойца -->
-                <img src="{{ b.icon_url }}"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div class="brawler-fallback" style="display:none;">{{ b.name }}</div>
+                {% if b.icon_url %}
+                    <img src="{{ b.icon_url }}" alt="{{ b.name }}">
+                {% else %}
+                    <div>{{ b.name }}</div>
+                {% endif %}
 
                 <div class="brawler-name">{{ b.name }}</div>
 
@@ -66,22 +69,18 @@
                     <p>Сила: {{ b.power }}</p>
                     <p>Прайм: {{ b.prestigeLevel }}</p>
                     {% if b.currentWinStreak > 0 %}
-                    <p>Винстрик: {{ b.currentWinStreak }}</p>
+                        <p>Винстрик: {{ b.currentWinStreak }}</p>
                     {% endif %}
                 </div>
 
                 {% if b.maxWinStreak > 0 %}
-                <div class="max-streak">
-                    Макс. винстрик: {{ b.maxWinStreak }}
-                </div>
+                    <div class="max-streak">Макс. винстрик: {{ b.maxWinStreak }}</div>
                 {% endif %}
 
                 <!-- Скин -->
                 <div class="skin-section">
                     {% if b.skin_url %}
-                        <img class="skin" src="{{ b.skin_url }}"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <div class="skin-text" style="display:none;">Скин: {{ b.skin.name }}</div>
+                        <img class="skin" src="{{ b.skin_url }}" alt="Скин: {{ b.skin.name }}">
                     {% else %}
                         <div class="skin-text">Нет скина</div>
                     {% endif %}
@@ -89,19 +88,23 @@
 
                 <!-- Гаджеты -->
                 <div class="brawler-extra">
-                    {% for g_url, g in zip(b.gadgets_url, b.gadgets) %}
-                        <img src="{{ g_url }}"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <div class="skin-text" style="display:none;">Гаджет: {{ g.name }}</div>
+                    {% for g_url, g in b.gadgets %}
+                        {% if g_url %}
+                            <img src="{{ g_url }}" alt="Гаджет: {{ g.name }}">
+                        {% else %}
+                            <div>{{ g.name }}</div>
+                        {% endif %}
                     {% endfor %}
                 </div>
 
                 <!-- Пассивки -->
                 <div class="brawler-extra">
-                    {% for s_url, s in zip(b.star_url, b.starPowers) %}
-                        <img src="{{ s_url }}"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <div class="skin-text" style="display:none;">Пассивка: {{ s.name }}</div>
+                    {% for s_url, s in b.starPowers %}
+                        {% if s_url %}
+                            <img src="{{ s_url }}" alt="Пассивка: {{ s.name }}">
+                        {% else %}
+                            <div>{{ s.name }}</div>
+                        {% endif %}
                     {% endfor %}
                 </div>
 
