@@ -39,9 +39,7 @@
         <h2>Максимальный винстрик среди всех бойцов</h2>
         <p>Винстрик: {{ max_streak }} 🏆</p>
         <p>Боец: {{ max_brawler }}</p>
-
-        {% set icon_file = 'brawlers/' + max_brawler.lower().replace(' ','_') + '.png' %}
-        <img src="{{ url_for('static', filename=icon_file) }}" alt="{{ max_brawler }}" 
+        <img src="{{ get_icon(max_brawler, 'brawlers') }}" alt="{{ max_brawler }}"
              style="width:60px; height:60px;"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
         <div style="display:none;">{{ max_brawler }}</div>
@@ -57,8 +55,7 @@
             <div class="brawler-scroll">
 
                 <!-- Иконка бойца -->
-                {% set b_icon = 'brawlers/' + b.name.lower().replace(' ','_') + '.png' %}
-                <img src="{{ url_for('static', filename=b_icon) }}"
+                <img src="{{ b.icon_url }}"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <div class="brawler-fallback" style="display:none;">{{ b.name }}</div>
 
@@ -81,10 +78,8 @@
 
                 <!-- Скин -->
                 <div class="skin-section">
-                    {% if b.skin %}
-                        {% set skin_file = 'skins/' + b.skin.name.lower().replace(' ','_') + '.png' %}
-                        <img class="skin"
-                             src="{{ url_for('static', filename=skin_file) }}"
+                    {% if b.skin_url %}
+                        <img class="skin" src="{{ b.skin_url }}"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <div class="skin-text" style="display:none;">Скин: {{ b.skin.name }}</div>
                     {% else %}
@@ -94,9 +89,8 @@
 
                 <!-- Гаджеты -->
                 <div class="brawler-extra">
-                    {% for g in b.gadgets %}
-                        {% set g_file = 'gadgets/' + g.name.lower().replace(' ','_') + '.png' %}
-                        <img src="{{ url_for('static', filename=g_file) }}"
+                    {% for g_url, g in zip(b.gadgets_url, b.gadgets) %}
+                        <img src="{{ g_url }}"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <div class="skin-text" style="display:none;">Гаджет: {{ g.name }}</div>
                     {% endfor %}
@@ -104,9 +98,8 @@
 
                 <!-- Пассивки -->
                 <div class="brawler-extra">
-                    {% for s in b.starPowers %}
-                        {% set s_file = 'starpowers/' + s.name.lower().replace(' ','_') + '.png' %}
-                        <img src="{{ url_for('static', filename=s_file) }}"
+                    {% for s_url, s in zip(b.star_url, b.starPowers) %}
+                        <img src="{{ s_url }}"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <div class="skin-text" style="display:none;">Пассивка: {{ s.name }}</div>
                     {% endfor %}
