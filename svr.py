@@ -22,7 +22,7 @@ class NickHistory(db.Model):
 db.create_all()
 
 # === Конфиг API ===
-key = "ТВОЙ_API_KEY"
+key = ""eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjI1ODAxMjk5LTY3ZTQtNDFkNS04MzM5LTg3OTAzMzViMzFjMCIsImlhdCI6MTc3NTcyMTkyMCwic3ViIjoiZGV2ZWxvcGVyL2JiMzhmY2M4LTIyMzctNmNlMC1jZmY5LTUzNzM3OGY0NGEzNiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzQuMjIwLjQ4LjI0MiIsIjkxLjIyNS4xNjIuNjEiXSwidHlwZSI6ImNsaWVudCJ9XX0.IH82igKjBy7w_WvK9xDiqISPXLlem-NCcAjfXCaqyklXG8dMF3YN5YED1F0b2NCIUFyJ4Ri4LvcProzMwauAXw""
 headers = {"Authorization": f"Bearer {key}"}
 base_url = "https://api.brawlstars.com/v1/"
 
