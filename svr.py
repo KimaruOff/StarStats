@@ -1,20 +1,37 @@
 from flask import Flask, request, render_template
+from flask_sqlalchemy import SQLAlchemy
 import requests
 
-key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjI1ODAxMjk5LTY3ZTQtNDFkNS04MzM5LTg3OTAzMzViMzFjMCIsImlhdCI6MTc3NTcyMTkyMCwic3ViIjoiZGV2ZWxvcGVyL2JiMzhmY2M4LTIyMzctNmNlMC1jZmY5LTUzNzM3OGY0NGEzNiIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiNzQuMjIwLjQ4LjI0MiIsIjkxLjIyNS4xNjIuNjEiXSwidHlwZSI6ImNsaWVudCJ9XX0.IH82igKjBy7w_WvK9xDiqISPXLlem-NCcAjfXCaqyklXG8dMF3YN5YED1F0b2NCIUFyJ4Ri4LvcProzMwauAXw"
+app = Flask(__name__, template_folder="html", static_folder="static")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///player_history.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
+# === Модели базы ===
+class Player(db.Model):
+    tag = db.Column(db.String, primary_key=True)
+    latest_name = db.Column(db.String, nullable=False)
+    nicks = db.relationship('NickHistory', backref='player', lazy=True, cascade="all, delete-orphan")
+
+class NickHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tag = db.Column(db.String, db.ForeignKey('player.tag'), nullable=False)
+    name = db.Column(db.String, nullable=False)
+    __table_args__ = (db.UniqueConstraint('tag', 'name', name='_tag_name_uc'),)
+
+db.create_all()
+
+# === Конфиг API ===
+key = "ТВОЙ_API_KEY"
 headers = {"Authorization": f"Bearer {key}"}
 base_url = "https://api.brawlstars.com/v1/"
 
-app = Flask(__name__, template_folder="html", static_folder="static")
-
-# Папки для статики на GitHub
+# === Папки для статики на GitHub ===
 ICON_PATH = "icons"
 SKIN_PATH = "skins"
 GADGET_PATH = "gadgets"
 STAR_PATH = "starpowers"
 
-# Генератор URL к GitHub-картинкам
 def gh_icon(name, folder):
     if not name:
         return None
@@ -27,7 +44,6 @@ def player_data(tag):
     return resp.json()
 
 def prepare_brawlers(brawlers):
-    """Собираем все URL для картинок сразу"""
     for b in brawlers:
         b_name = b.get("name","")
         skin_name = b.get("skin", {}).get("name","")
@@ -38,14 +54,29 @@ def prepare_brawlers(brawlers):
         b["starPowers"] = [(gh_icon(s.get("name",""), STAR_PATH), s) for s in b.get("starPowers",[])]
     return brawlers
 
+# === Работа с историей ===
+def save_player(tag, name):
+    player = Player.query.get(tag)
+    if player:
+        player.latest_name = name
+    else:
+        player = Player(tag=tag, latest_name=name)
+        db.session.add(player)
+    # Добавляем ник в историю, если нет
+    if not NickHistory.query.filter_by(tag=tag, name=name).first():
+        db.session.add(NickHistory(tag=tag, name=name))
+    db.session.commit()
+
+def find_tag_by_nick(nick):
+    nh = NickHistory.query.filter_by(name=nick).first()
+    if nh:
+        return nh.tag
+    return None
+
+# === Роуты ===
 @app.route("/")
 def main_page():
     return render_template("main.html")
-
-@app.route("/ip")
-def get_ip():
-    import requests
-    return requests.get("https://api.ipify.org").text
 
 @app.route("/player")
 def player_stats():
@@ -53,8 +84,19 @@ def player_stats():
     if not q:
         return "Введите тег или ник"
 
-    tag = q if q.startswith("#") else "#" + q
-    data = player_data(tag)
+    # Определяем тег
+    if q.startswith("#"):
+        tag = q.upper()
+    else:
+        tag = find_tag_by_nick(q)
+        if not tag:
+            return f"Ник {q} не найден в истории. Попробуйте тег."
+
+    # Получаем данные через API
+    data = player_data(tag.strip("#"))
+
+    # Сохраняем тег и ник
+    save_player(tag, data.get("name","Unknown"))
 
     # Бойцы
     brawlers = data.get("brawlers", [])
