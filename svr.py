@@ -50,6 +50,11 @@ def prepare_brawlers(brawlers):
 def main_page():
     return render_template("main.html")
 
+@app.route("/ip")
+def get_ip():
+    import requests
+    return requests.get("https://api.ipify.org").text
+
 @app.route("/player")
 def player_stats():
     q = request.args.get("q")
